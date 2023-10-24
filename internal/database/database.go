@@ -18,7 +18,7 @@ import (
 var DB *mongo.Database
 
 const (
-	databaseName      = "sampleDatabase"
+	DatabaseName      = "sampleDatabase"
 	PersonsCollection = "persons"
 	BatchSize         = 10
 	DefaultTimeout    = time.Second * 10
@@ -40,7 +40,7 @@ func InitDB() {
 	}
 
 	// Set the database and collection
-	DB = client.Database(databaseName)
+	DB = client.Database(DatabaseName)
 	collection := DB.Collection(PersonsCollection)
 
 	// Create the indexes
