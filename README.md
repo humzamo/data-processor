@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This Go microservice connects to a Mongo database with information about people, parses their names to find their middle names, and saved the result in a field in the collection.
+This Go microservice connects to a Mongo database with information about people, parses their names to find their middle names, and saves the result in a field in the collection.
 
 ## Requirements
 
@@ -61,3 +61,11 @@ Upon receiving a request on the `pause` endpoint the app:
 - checks if the process is finished and if so, returns a 200 status
 - if the process is not started, return 412
 - if the process is not finished, pauses the process and returns a 200 status
+
+## Assumptions/Further Improvements
+
+- The authentication for the sample DB in the container has been kept very simple for testing purposes; this could (and should!) be made more secure (e.g. by storing the password in an environment variable or secret)
+- Some assumptions have been made for populating data (i.e. if there is no data in the collection, add the sample data)
+- The processing function logic has been kept simple and only parses a name for middle names. This could be made more detailed/complicated with additional requirements.
+- The sleeping logic has been used for testing and to simulate what could happen there the database is much larger and processing needs to be more segmented,
+- For simplicity, the processing status has been restricted to a variable within the API instance, but this could be expanded to allow for syncronisation across multiple instances (for example by having an additional endpoint to manage, control, and lock the status across instances). At present, each instance would separately manage the processing status (e.g. if processing was started for one instance, it wouldn't start for all instances). However, since each instance connects to the same MongoDB, and the processed flag is updated for each record, there would not be any duplicate processing and the instances would still align and ultimately finish together.
