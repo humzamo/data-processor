@@ -19,12 +19,7 @@ func main() {
 	api.InitRoutes()
 	database.InitDB()
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	serverAddr := ":" + port
+	serverAddr := ":" + config.Port
 	server := &http.Server{
 		Addr:         serverAddr,
 		ReadTimeout:  15 * time.Second,
@@ -47,7 +42,6 @@ func main() {
 	defer cancel()
 	if err := server.Shutdown(ctx); err != nil {
 		log.Printf("Server shutdown error: %v\n", err)
-	} else {
-		log.Println("Server gracefully stopped")
 	}
+	log.Println("Server gracefully stopped")
 }

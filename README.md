@@ -12,6 +12,7 @@ This Go microservice connects to a Mongo database with information about people,
 ## Config
 
 An environment variable for `MONGO_URI` can be set up to give access to a specific Mongo instance. Otherwise, a default sample instance will be used. If using a specific instance managed via Docker, you can ammend the `docker-compose.yml` if required to run using this script.
+An environment variable for `PORT` can be set up to run the API on a specific port. Otherwise, a default port will be used.
 
 ## How to Run
 
