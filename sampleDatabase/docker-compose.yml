@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  mongo:
+    image: mongo:latest
+    container_name: sampleContainer
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: sampleDatabase
+      MONGO_INITDB_ROOT_USERNAME: username
+      MONGO_INITDB_ROOT_PASSWORD: password
+    healthcheck:
+      test: test $$(echo "rs.initiate().ok || rs.status().ok" | mongo --quiet) -eq 1
+      interval: 10s
+      start_period: 30s
+    command:
+      [
+        "--port",
+        "27017",
+        "--bind_ip",
+        "127.0.0.1",
+        "--bind_ip_all",
+      ]
+    logging:
+      driver: none
