@@ -12,4 +12,4 @@ database-down:
 
 database-drop:
 	@cd ./sample-database && go run drop.go
-	.PHONY: database-drop
+.PHONY: database-drop

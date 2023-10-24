@@ -37,8 +37,8 @@ var sampleData = []interface{}{
 	},
 	models.Person{
 		ID:      "2",
-		Name:    "Amelia Abigail Alice Adams",
-		Age:     10,
+		Name:    "Bettie Bart Barry Benedict",
+		Age:     20,
 		UKBased: true,
 	},
 	models.Person{

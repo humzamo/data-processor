@@ -1,5 +1,6 @@
 package models
 
+// Person is a struct for the documents in the Persons collection
 type Person struct {
 	ID          string `bson:"_id" json:"id"`
 	Name        string `bson:"name" json:"name"`

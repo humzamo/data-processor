@@ -15,39 +15,50 @@ import (
 )
 
 var (
-	processingInProgress bool
-	processingFinished   bool
+	status ProcessingStatus
 )
 
 const (
 	batchSize = 3
+	sleepTime = time.Second * 15
 )
 
-func StartProcessing(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("call to StartProcessing handler")
+// StartHandler is the handler for the start endpoint
+func StartHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Call to StartProcessing handler")
 
-	if processingInProgress {
+	if status == ProcessingStatusFinished {
+		http.Error(w, "Processing has already finished!", http.StatusAccepted)
+		return
+	}
+
+	if status == ProcessingStatusProcessing {
 		http.Error(w, "Processing is already in progress", http.StatusTooManyRequests)
 		return
 	}
 
 	// Set processing in progress and start processing
-	processingInProgress = true
+	status = ProcessingStatusProcessing
+	fmt.Println("Beginning processing...")
 
 	go func() {
 		for {
+			if status == ProcessingStatusPaused {
+				fmt.Println("Processing has been paused")
+				return
+			}
+
 			// Get a batch of unprocessed persons from the database
 			persons, err := database.GetUnprocessedPersons(batchSize)
 			if err != nil {
 				http.Error(w, "Error fetching unprocessed persons", http.StatusInternalServerError)
-				processingInProgress = false
+				fmt.Println("Error fetching unprocessed persons. Pausing processing.", err.Error())
+				status = ProcessingStatusPaused
 				return
 			}
 
+			// No more unprocessed persons, stop processing
 			if len(persons) == 0 {
-				// No more unprocessed persons, stop processing
-				fmt.Println("Processing has finshed!")
-				processingFinished = true
 				break
 			}
 
@@ -58,38 +69,34 @@ func StartProcessing(w http.ResponseWriter, r *http.Request) {
 
 			// Process the batch of persons
 			for _, person := range persons {
-				person.MiddleNames = ExtractMiddleName(person.Name)
+				person.MiddleNames = extractMiddleName(person.Name)
 
 				// Update the "processed" flag to mark it as processed
 				person.Processed = true
 
-				updateResult, err := collection.ReplaceOne(ctx, bson.M{"_id": person.ID}, person)
+				_, err := collection.ReplaceOne(ctx, bson.M{"_id": person.ID}, person)
 				if err != nil {
-					log.Printf("Error updating person: %v", err)
-				} else {
-					log.Printf("Updated %v documents", updateResult.ModifiedCount)
+					log.Printf("Error updating document ID %s for person: %v", person.ID, err)
 				}
+				log.Printf("Updated document ID %s", person.ID)
 			}
 
 			// Artifical sleep added for testing purposes
-			fmt.Println("sleeping...")
-			time.Sleep(time.Second * 15)
+			fmt.Println("Sleeping...")
+			time.Sleep(sleepTime)
 		}
 
-		// Set processingInProgress to false when processing is complete
-		processingInProgress = false
+		// Set status to finished when processing is complete
+		fmt.Println("Processing has finshed!")
+		status = ProcessingStatusFinished
 	}()
-	fmt.Println("Beginning processing...")
+
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func Stats(w http.ResponseWriter, r *http.Request) {
-	if processingFinished {
-		http.Error(w, "Processing has finished", http.StatusPreconditionFailed)
-		return
-	}
-
-	if !processingInProgress {
+// StatsHandler is the handler for the stats endpoint
+func StatsHandler(w http.ResponseWriter, r *http.Request) {
+	if status == ProcessingStatusNotStarted {
 		http.Error(w, "Processing has not started", http.StatusPreconditionFailed)
 		return
 	}
@@ -100,13 +107,13 @@ func Stats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := database.ProcessedItems{Count: processedItems}
+	response := database.ProcessedItems{Count: processedItems, Status: string(status)}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
 }
 
-func ExtractMiddleName(name string) string {
+func extractMiddleName(name string) string {
 	// Split the name into words
 	words := strings.Fields(name)
 

@@ -15,7 +15,7 @@ const (
 	defaultPort     = "8080"
 )
 
-// Init initilises the config for the microservice
+// Init initialises the config for the microservice
 func Init() {
 	MongoURI = os.Getenv("MONGO_URI")
 	if MongoURI == "" {

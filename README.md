@@ -13,6 +13,7 @@ This Go microservice connects to a Mongo database with information about people,
 
 An environment variable for `MONGO_URI` can be set up to give access to a specific Mongo instance. Otherwise, a default sample instance will be used. If using a specific instance managed via Docker, you can ammend the `docker-compose.yml` if required to run using this script.
 An environment variable for `PORT` can be set up to run the API on a specific port. Otherwise, a default port will be used.
+There is an artifical sleep implemented between calling batches from the database. This has been used for testing purposes and can be configured/removed by altering the `sleepTime` variable in `handler.go`.
 
 ## How to Run
 

@@ -24,6 +24,7 @@ const (
 	DefaultTimeout    = time.Second * 10
 )
 
+// Init initialises the Mongo DB
 func InitDB() {
 	clientOptions := options.Client().ApplyURI(config.MongoURI)
 	client, err := mongo.Connect(context.Background(), clientOptions)
@@ -64,13 +65,15 @@ func InitDB() {
 		}
 		fmt.Println("Sample data added to collection successfully.")
 	}
-
 }
 
+// ProcessedItems contains a count of the number of documents which have been processed and the current processing status
 type ProcessedItems struct {
-	Count int `json:"processedItems"`
+	Count  int    `json:"processedItems"`
+	Status string `json:"processingStatus"`
 }
 
+// GetProcessedItemCount returns a count of the documents have have been processed
 func GetProcessedItemCount() (int, error) {
 	collection := DB.Collection(PersonsCollection)
 
