@@ -11,4 +11,5 @@ func InitRoutes() {
 	})
 	http.HandleFunc("/start", StartHandler)
 	http.HandleFunc("/stats", StatsHandler)
+	http.HandleFunc("/pause", PauseHandler)
 }

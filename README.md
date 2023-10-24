@@ -55,3 +55,9 @@ Upon receiving a request on the `stats` endpoint the app:
 
 - checks if the process is in progress or finished and return the number of already processed items (with a 200 status for REST)
 - if the process is not started, return 412
+
+Upon receiving a request on the `pause` endpoint the app:
+
+- checks if the process is finished and if so, returns a 200 status
+- if the process is not started, return 412
+- if the process is not finished, pauses the process and returns a 200 status

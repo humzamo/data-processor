@@ -25,7 +25,7 @@ const (
 
 // StartHandler is the handler for the start endpoint
 func StartHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Call to StartProcessing handler")
+	fmt.Println("Call to StartHandler")
 
 	if status == ProcessingStatusFinished {
 		http.Error(w, "Processing has already finished!", http.StatusAccepted)
@@ -39,7 +39,7 @@ func StartHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Set processing in progress and start processing
 	status = ProcessingStatusProcessing
-	fmt.Println("Beginning processing...")
+	fmt.Println("Processing...")
 
 	go func() {
 		for {
@@ -96,6 +96,8 @@ func StartHandler(w http.ResponseWriter, r *http.Request) {
 
 // StatsHandler is the handler for the stats endpoint
 func StatsHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Call to StatsHandler")
+
 	if status == ProcessingStatusNotStarted {
 		http.Error(w, "Processing has not started", http.StatusPreconditionFailed)
 		return
@@ -111,6 +113,26 @@ func StatsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
+}
+
+// Pause is the handler for the pause endpoint
+func PauseHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Call to PauseHandler")
+
+	if status == ProcessingStatusFinished {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Processing has already finished"))
+		return
+	}
+
+	if status == ProcessingStatusNotStarted {
+		http.Error(w, "Processing has not started", http.StatusPreconditionFailed)
+		return
+	}
+
+	status = ProcessingStatusPaused
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Processing has been paused"))
 }
 
 func extractMiddleName(name string) string {
